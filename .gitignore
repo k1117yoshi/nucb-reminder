@@ -1,6 +1,7 @@
 .env*
 samconfig.toml
-.aws-sam/__pycache__/
+.aws-sam/
 .pytest_cache/
 .venv/
-.venv/
+__pycache__/
+履修登録期間.pdf
