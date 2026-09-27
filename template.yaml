@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: nucb-reminder - MBAグループ向けLINE締切リマインダーBot
+
+Parameters:
+  TokenParamName:
+    Type: String
+    Default: /line-reminder/channel-access-token
+  SecretParamName:
+    Type: String
+    Default: /line-reminder/channel-secret
+  GroupIdParamName:
+    Type: String
+    Default: /line-reminder/group-id
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Architectures:
+      - arm64
+    Timeout: 30
+    MemorySize: 128
+
+Resources:
+  DeadlinesTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: deadlines
+      BillingMode: PROVISIONED
+      AttributeDefinitions:
+        - AttributeName: deadline_date
+          AttributeType: S
+        - AttributeName: title
+          AttributeType: S
+        - AttributeName: start_date
+          AttributeType: S
+      KeySchema:
+        - AttributeName: deadline_date
+          KeyType: HASH
+        - AttributeName: title
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      GlobalSecondaryIndexes:
+        - IndexName: start-date-index
+          KeySchema:
+            - AttributeName: start_date
+              KeyType: HASH
+            - AttributeName: title
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+
+  ReminderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/reminder/
+      Handler: app.lambda_handler
+      LoggingConfig:
+        LogGroup: !Ref ReminderLogGroup
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DeadlinesTable
+          GSI_NAME: start-date-index
+          TOKEN_PARAM: !Ref TokenParamName
+          GROUP_ID_PARAM: !Ref GroupIdParamName
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:Query
+              Resource:
+                - !GetAtt DeadlinesTable.Arn
+                - !Sub "${DeadlinesTable.Arn}/index/start-date-index"
+            - Effect: Allow
+              Action: ssm:GetParameter
+              Resource:
+                - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TokenParamName}"
+                - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GroupIdParamName}"
+      Events:
+        Daily:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 9 * * ? *)
+            ScheduleExpressionTimezone: Asia/Tokyo
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+
+  ReminderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/nucb-reminder-reminder
+      RetentionInDays: 14
+
+  WebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/webhook/
+      Handler: app.lambda_handler
+      LoggingConfig:
+        LogGroup: !Ref WebhookLogGroup
+      Environment:
+        Variables:
+          SECRET_PARAM: !Ref SecretParamName
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: ssm:GetParameter
+              Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${SecretParamName}"
+      # LINEから直接呼ばれるため認証なし。正当性は X-Line-Signature の検証で担保する
+      FunctionUrlConfig:
+        AuthType: NONE
+
+  WebhookLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/nucb-reminder-webhook
+      RetentionInDays: 14
+
+Outputs:
+  WebhookFunctionUrl:
+    Description: LINE Developers の Webhook URL に設定する
+    Value: !GetAtt WebhookFunctionUrl.FunctionUrl
+  TableName:
+    Value: !Ref DeadlinesTable

@@ -1,0 +1,17 @@
+{
+  "deadlines": [
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-09-05"}, "title": {"S": "[F1] Innovation & Creative Thinking"}, "start_date": {"S": "2026-08-22"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-09-11"}, "title": {"S": "[F2] Business Economics"}, "start_date": {"S": "2026-08-22"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-09-25"}, "title": {"S": "[F3] MBA Essentials"}, "start_date": {"S": "2026-09-05"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-10-16"}, "title": {"S": "[F4] Business Model Design"}, "start_date": {"S": "2026-09-26"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-10-30"}, "title": {"S": "[F5] Management Accounting & Control"}, "start_date": {"S": "2026-10-10"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-11-13"}, "title": {"S": "[F6] Financial Analysis"}, "start_date": {"S": "2026-10-24"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-12-04"}, "title": {"S": "[F7] Competitiveness - Country and Global Perspectives"}, "start_date": {"S": "2026-11-21"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-12-04"}, "title": {"S": "[F7] Talent Management in the Digital Era"}, "start_date": {"S": "2026-11-21"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-12-04"}, "title": {"S": "[F7] Financial Market Simulation"}, "start_date": {"S": "2026-11-21"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-12-04"}, "title": {"S": "[F7] Designing Organizations"}, "start_date": {"S": "2026-11-21"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-12-04"}, "title": {"S": "[F7] Leading Global Business"}, "start_date": {"S": "2026-11-21"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-12-04"}, "title": {"S": "[F7] Business Ethics for Leaders"}, "start_date": {"S": "2026-11-21"}}}},
+    {"PutRequest": {"Item": {"deadline_date": {"S": "2026-12-25"}, "title": {"S": "[F8] Crisis Management and Business Continuity"}, "start_date": {"S": "2026-12-05"}}}}
+  ]
+}
